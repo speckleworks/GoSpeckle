@@ -66,14 +66,12 @@ func main() {
 		AnonymousComments: false,
 	}
 	newStream := gospeckle.StreamRequest{
-		// Metadata:    &streamBase,
 		RequestMetadata: &streamBase,
 		Description:     "A fancy new go stream",
 		Tags:            []string{"test", "golang"},
 	}
 
 	stream, _, err := client.Stream.Create(ctx, newStream)
-	// stream, _, err := client.Stream.Get(ctx, "ufF4mPRuZ")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

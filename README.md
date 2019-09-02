@@ -27,6 +27,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 
 	gospeckle "github.com/speckleworks/GoSpeckle/pkg"
@@ -51,9 +52,12 @@ func PrintJson(body interface{}) {
 func main() {
 	ctx := context.TODO()
 
-  httpClient := new(http.Client)
-  apiURL := "https://hestia.speckle.works/api/v1/"
-	client := gospeckle.NewClient(httpClient, apiURL, nil, "", "")
+	httpClient := new(http.Client)
+	apiURL := &url.URL{
+		Scheme: "https",
+		Host:   "hestia.speckle.woks",
+	}
+	client := gospeckle.NewClient(httpClient, apiURL, nil, "v1", "")
 
 	client.Login(ctx, "go@speckle.come", "some-secret-password")
 

@@ -15,7 +15,7 @@ type ProjectPermissions struct {
 
 // Project is the request response when fetching projects
 type Project struct {
-	Metadata    Metadata
+	Metadata
 	Name        string             `json:"name"`
 	Tags        []string           `json:"tags,omitempty"`
 	Streams     []string           `json:"streams,omitempty"`
@@ -31,10 +31,10 @@ type ProjectStreamResponse struct {
 
 // ProjectRequest is the request payload used to create and update projects
 type ProjectRequest struct {
-	Metadata *RequestMetadata
-	Name     string   `json:"name"`
-	Tags     []string `json:"tags"`
-	Streams  []string `json:"streams"`
+	RequestMetadata
+	Name    string   `json:"name"`
+	Tags    []string `json:"tags"`
+	Streams []string `json:"streams"`
 }
 
 // ProjectService is the service that communicates with the Projects API
@@ -149,7 +149,7 @@ func (s *ProjectService) GetComments(ctx context.Context, id string) ([]Comment,
 		return *resource, nil, err
 	}
 
-	resp, _, err := s.client.Do(ctx, req, &resource, false)
+	resp, _, err := s.client.Do(ctx, req, resource, false)
 	if err != nil {
 		return *resource, nil, err
 	}

@@ -5,16 +5,16 @@ import "time"
 // Metadata is the common metadata all resources (bar accounts) possess when returned
 // from the Speckle Server.
 type Metadata struct {
-	ID                string    `json:"_id,omitempty"`
-	Private           bool      `json:"private"`
-	CanRead           []string  `json:"canRead"`
-	CanWrite          []string  `json:"canWrite"`
-	Owner             string    `json:"owner"`
-	AnonymousComments bool      `json:"anonymousComments"`
-	Comments          []string  `json:"comments"`
-	CreatedAt         time.Time `json:"createdAt,omitempty"`
-	UpdatedAt         time.Time `json:"updatedAt,omitempty"`
-	Version           int       `json:"__v"`
+	ID                string     `json:"_id,omitempty"`
+	Private           bool       `json:"private"`
+	CanRead           []string   `json:"canRead"`
+	CanWrite          []string   `json:"canWrite"`
+	Owner             string     `json:"owner"`
+	AnonymousComments bool       `json:"anonymousComments"`
+	Comments          []string   `json:"comments"`
+	CreatedAt         *time.Time `json:"createdAt,omitempty"`
+	UpdatedAt         *time.Time `json:"updatedAt,omitempty"`
+	Version           int        `json:"__v"`
 }
 
 // RequestMetadata is the common metadata all resources (bar accounts) should posess

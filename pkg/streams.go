@@ -41,8 +41,8 @@ type Layer struct {
 
 // Stream is the request response when fetching streams
 type Stream struct {
-	*Metadata
-	StreamID      string   `json:"streamdId,omitempty"`
+	Metadata
+	StreamID      string   `json:"streamId,omitempty"`
 	Name          string   `json:"name,omitempty"`
 	Description   string   `json:"description,omitempty"`
 	Tags          []string `json:"tags,omitempty"`
@@ -61,7 +61,7 @@ type StreamStreamResponse struct {
 
 // StreamRequest is the request payload used to create and update streams
 type StreamRequest struct {
-	*RequestMetadata
+	RequestMetadata
 	Name          string    `json:"name,omitempty"`
 	Description   string    `json:"description,omitempty"`
 	Tags          []string  `json:"tags,omitempty"`
@@ -208,7 +208,7 @@ func (s *StreamService) GetComments(ctx context.Context, id string) ([]Comment, 
 		return *resource, nil, err
 	}
 
-	resp, _, err := s.client.Do(ctx, req, &resource, false)
+	resp, _, err := s.client.Do(ctx, req, resource, false)
 	if err != nil {
 		return *resource, nil, err
 	}

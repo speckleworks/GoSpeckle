@@ -10,7 +10,7 @@ const objectBasePath = "objects"
 
 // Object is the request response when fetching objects
 type Object struct {
-	Metadata      Metadata
+	Metadata
 	ApplicationID string                 `json:"applicationId,omitempty"`
 	Hash          string                 `json:"hash,omitempty"`
 	GeometryHash  string                 `json:"geometryHash,omitempty"`
@@ -25,7 +25,7 @@ type Object struct {
 
 // ObjectRequest is the request payload used to create and update objects
 type ObjectRequest struct {
-	Metadata      *RequestMetadata
+	RequestMetadata
 	ApplicationID string                 `json:"applicationId,omitempty"`
 	Hash          string                 `json:"hash,omitempty"`
 	GeometryHash  string                 `json:"geometryHash,omitempty"`
@@ -51,11 +51,11 @@ type ObjectService struct {
 	client *Client
 }
 
-// List retrieves a list of Objects
-func (s *ObjectService) List(ctx context.Context) ([]Object, *http.Response, error) {
+// Search retrieves a list of Objects
+func (s *ObjectService) Search(ctx context.Context, query string, ids []string) ([]Object, *http.Response, error) {
 	resource := new([]Object)
 
-	req, err := s.client.NewRequest(ctx, http.MethodGet, objectBasePath, nil)
+	req, err := s.client.NewRequest(ctx, http.MethodPost, objectBasePath+"/getbulk?"+query, ids)
 	if err != nil {
 		return *resource, nil, err
 	}
@@ -158,7 +158,7 @@ func (s *ObjectService) GetComments(ctx context.Context, id string) ([]Comment, 
 		return *resource, nil, err
 	}
 
-	resp, _, err := s.client.Do(ctx, req, &resource, false)
+	resp, _, err := s.client.Do(ctx, req, resource, false)
 	if err != nil {
 		return *resource, nil, err
 	}

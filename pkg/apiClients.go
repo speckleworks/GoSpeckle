@@ -9,7 +9,7 @@ const apiClientBasePath = "clients"
 
 // APIClient is the request response when fetching apiClients
 type APIClient struct {
-	Metadata         Metadata
+	Metadata
 	Role             string `json:"role,omitempty"`
 	DocumentName     string `json:"documentName,omitempty"`
 	DocumentType     string `json:"documentType,omitempty"`
@@ -22,7 +22,7 @@ type APIClient struct {
 
 // APIClientRequest is the request payload used to create and update apiClients
 type APIClientRequest struct {
-	Metadata         *RequestMetadata
+	RequestMetadata
 	Role             string `json:"role,omitempty"`
 	DocumentName     string `json:"documentName,omitempty"`
 	DocumentType     string `json:"documentType,omitempty"`
@@ -133,21 +133,4 @@ func (s *APIClientService) CreateComment(ctx context.Context, id string, new Com
 	}
 
 	return resource, resp, nil
-}
-
-// GetComments will get comments for a specific APIClient indexed by ID.
-func (s *APIClientService) GetComments(ctx context.Context, id string) ([]Comment, *http.Response, error) {
-	resource := new([]Comment)
-
-	req, err := s.client.NewRequest(ctx, http.MethodGet, "comments/"+apiClientBasePath+"/"+id, nil)
-	if err != nil {
-		return *resource, nil, err
-	}
-
-	resp, _, err := s.client.Do(ctx, req, &resource, false)
-	if err != nil {
-		return *resource, nil, err
-	}
-
-	return *resource, resp, nil
 }

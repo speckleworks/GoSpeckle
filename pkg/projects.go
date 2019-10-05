@@ -59,6 +59,23 @@ func (s *ProjectService) List(ctx context.Context) ([]Project, *http.Response, e
 	return *resource, resp, nil
 }
 
+// AdminGet retrieves all user accounts on the server
+func (s *ProjectService) AdminGet(ctx context.Context) ([]Project, *http.Response, error) {
+	resource := new([]Project)
+
+	req, err := s.client.NewRequest(ctx, http.MethodGet, projectBasePath+"/admin", nil)
+	if err != nil {
+		return *resource, nil, err
+	}
+
+	resp, _, err := s.client.Do(ctx, req, resource, false)
+	if err != nil {
+		return *resource, nil, err
+	}
+
+	return *resource, resp, nil
+}
+
 // Get retrieves a specific project indexed by it's ID
 func (s *ProjectService) Get(ctx context.Context, id string) (Project, *http.Response, error) {
 	resource := new(Project)

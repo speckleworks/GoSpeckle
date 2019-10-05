@@ -77,6 +77,23 @@ func (s *AccountService) Get(ctx context.Context, id string) (Account, *http.Res
 	return *account, resp, nil
 }
 
+// AdminGet retrieves all user accounts on the server
+func (s *AccountService) AdminGet(ctx context.Context) ([]Account, *http.Response, error) {
+	account := new([]Account)
+
+	req, err := s.client.NewRequest(ctx, http.MethodGet, accountBasePath+"/admin", nil)
+	if err != nil {
+		return *account, nil, err
+	}
+
+	resp, _, err := s.client.Do(ctx, req, account, false)
+	if err != nil {
+		return *account, nil, err
+	}
+
+	return *account, resp, nil
+}
+
 // Me retrieves the current user's account as identified by using the authenticaton token
 func (s *AccountService) Me(ctx context.Context) (Account, *http.Response, error) {
 	account := new(Account)

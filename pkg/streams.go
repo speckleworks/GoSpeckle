@@ -118,6 +118,23 @@ func (s *StreamService) List(ctx context.Context) ([]Stream, *http.Response, err
 	return *resource, resp, nil
 }
 
+// AdminGet retrieves all user accounts on the server
+func (s *StreamService) AdminGet(ctx context.Context) ([]Stream, *http.Response, error) {
+	resource := new([]Stream)
+
+	req, err := s.client.NewRequest(ctx, http.MethodGet, streamBasePath+"/admin", nil)
+	if err != nil {
+		return *resource, nil, err
+	}
+
+	resp, _, err := s.client.Do(ctx, req, resource, false)
+	if err != nil {
+		return *resource, nil, err
+	}
+
+	return *resource, resp, nil
+}
+
 // Get retrieves a specific stream indexed by it's ID
 func (s *StreamService) Get(ctx context.Context, id string) (Stream, *http.Response, error) {
 	resource := new(Stream)

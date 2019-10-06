@@ -22,7 +22,7 @@ var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Save an authentication token to your current context config.",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := speckleClient.Login(ctx, currentConfig.User.Email, password)
+		err := speckleClient.Login(ctx, currentConfig.User.Email, password, true)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

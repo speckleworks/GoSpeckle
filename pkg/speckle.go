@@ -235,7 +235,7 @@ type ClientUser struct {
 }
 
 // Login is the function used to login an existing user with an email and a password.
-func (c *Client) Login(ctx context.Context, email string, password string) error {
+func (c *Client) Login(ctx context.Context, email string, password string, persistentToken bool) error {
 	authPayload := AuthPayload{
 		Email:    email,
 		Password: password,
@@ -251,7 +251,11 @@ func (c *Client) Login(ctx context.Context, email string, password string) error
 
 	c.User = clientUser
 
+	if persistentToken {
+		c.Token = clientUser.APIToken
+	} else {
 	c.Token = clientUser.Token
+	}
 
 	return err
 }

@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 const (
@@ -82,9 +84,20 @@ func NewClient(httpClient *http.Client, apiURL *url.URL, websocketsURL *url.URL,
 	}
 
 	if websocketsURL == nil {
+		var wsScheme string
+
+		switch apiURL.Scheme {
+		case "http":
+			wsScheme = "ws"
+		case "https":
+			wsScheme = "wss"
+		default:
+			wsScheme = defaultWebsocketsScheme
+		}
+
 		websocketsURL = &url.URL{
-			Scheme: defaultWebsocketsScheme,
-			Host:   defaultHost,
+			Scheme: wsScheme,
+			Host:   apiURL.Host,
 		}
 	}
 
@@ -128,6 +141,20 @@ func (c *Client) NewRequest(ctx context.Context, method, urlStr string, body int
 	req.Header.Add("Accept", mediaType)
 	req.Header.Add("Authorization", c.Token)
 	return req, nil
+}
+
+// NewWebsocket returns a gorilla websocket connection from a client ID and a stream ID
+func (c *Client) NewWebsocket(clientID string, streamID string) (*websocket.Conn, *http.Response, error) {
+	params := url.Values{}
+
+	params.Add("access_token", c.Token)
+	params.Add("client_id", clientID)
+	params.Add("stream_id", streamID)
+
+	// Not sure if overwriting the actual WebsocketsURL or just modding it here but not committing it back to the client struct
+	c.WebsocketsURL.RawQuery = params.Encode()
+
+	return websocket.DefaultDialer.Dial(c.WebsocketsURL.String(), nil)
 }
 
 // newResponse creates a new Response for the provided http.Response
@@ -254,7 +281,7 @@ func (c *Client) Login(ctx context.Context, email string, password string, persi
 	if persistentToken {
 		c.Token = clientUser.APIToken
 	} else {
-	c.Token = clientUser.Token
+		c.Token = clientUser.Token
 	}
 
 	return err

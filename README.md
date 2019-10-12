@@ -10,9 +10,7 @@ For the moment the package interacts with:
 * Projects
 * Streams
 * Objects
-
-And cannot interact with:
-* Websockets API
+* Websockets (by creating a connection; handling it is up to developers)
 
 ## Examples
 To create a new Stream:

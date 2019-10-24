@@ -36,6 +36,15 @@ type AccountUpdateRequest struct {
 	Company string `json:"company,omitempty"`
 }
 
+// AccountRegisterRequest is the request payload used to create a new account
+type AccountRegisterRequest struct {
+	Name     string `json:"name,omitempty"`
+	Surname  string `json:"surname,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Company  string `json:"company,omitempty"`
+	Password string `json:"password"`
+}
+
 // AccountRoleUpdateRequest is the request payload used to update the role of an account
 type AccountRoleUpdateRequest struct {
 	Role string `json:"role"`
@@ -75,6 +84,18 @@ func (s *AccountService) Get(ctx context.Context, id string) (Account, *http.Res
 	}
 
 	return *account, resp, nil
+}
+
+// Register is the function used to login an existing user with an email and a password.
+func (s *AccountService) Register(ctx context.Context, account AccountRegisterRequest) error {
+	req, err := s.client.NewRequest(ctx, http.MethodPost, "accounts/register", account)
+	if err != nil {
+		return err
+	}
+
+	_, _, err = s.client.Do(ctx, req, nil, false)
+
+	return err
 }
 
 // AdminGet retrieves all user accounts on the server

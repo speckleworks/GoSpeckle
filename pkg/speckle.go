@@ -143,8 +143,14 @@ func (c *Client) NewRequest(ctx context.Context, method, urlStr string, body int
 	return req, nil
 }
 
+type WebsocketMessage struct {
+	EventName string      `yaml:"eventName" json:"eventName"`
+	StreamID  string      `yaml:"streamId" json:"streamId"`
+	Payload   interface{} `yaml:"payload" json:"payload"`
+}
+
 // NewWebsocket returns a gorilla websocket connection from a client ID and a stream ID
-func (c *Client) NewWebsocket(clientID string, streamID string) (*websocket.Conn, *http.Response, error) {
+func (c *Client) NewWebsocket(clientID string, streamID string) (*websocket.Conn, error) {
 	params := url.Values{}
 
 	params.Add("access_token", c.Token)
@@ -154,7 +160,19 @@ func (c *Client) NewWebsocket(clientID string, streamID string) (*websocket.Conn
 	// Not sure if overwriting the actual WebsocketsURL or just modding it here but not committing it back to the client struct
 	c.WebsocketsURL.RawQuery = params.Encode()
 
-	return websocket.DefaultDialer.Dial(c.WebsocketsURL.String(), nil)
+	ws, _, err := websocket.DefaultDialer.Dial(c.WebsocketsURL.String(), nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	ws.SetPingHandler(func(appData string) error {
+		fmt.Println("Received ping!")
+		msg := []byte("alive")
+		return ws.WriteMessage(websocket.TextMessage, msg)
+	})
+
+	return ws, nil
 }
 
 // newResponse creates a new Response for the provided http.Response

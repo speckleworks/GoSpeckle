@@ -1,0 +1,46 @@
+type: "project"
+metadata:
+  private: true
+  anonymousComments: false
+spec:
+  name: "test project"
+  tags:
+    - "test"
+    - "empty"
+    - "basic"
+---
+type: "client"
+metadata:
+  private: true
+  anonymousComments: false
+spec: 
+  role: "reader"
+  documentName: "Test client"
+  documentType: ""
+  documentLocation: ""
+  documentGUID: ""
+  streamId: ""
+  online: true
+---
+type: "stream"
+metadata: 
+  private: true
+  anonymousComments: false
+spec: 
+  name: "Test Stream"
+  description: "A stream for streaming purposes"
+  tags:
+    - "test"
+    - "basic"
+---
+type: "project"
+metadata:
+  private: true
+  anonymousComments: false
+spec:
+  name: "test project"
+  tags:
+    - "test"
+    - "empty"
+    - "basic"
+---

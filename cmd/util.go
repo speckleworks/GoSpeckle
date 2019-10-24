@@ -2,10 +2,16 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"log"
 	"os"
+	"path/filepath"
 
+	"github.com/mitchellh/mapstructure"
+	gospeckle "github.com/speckleworks/gospeckle/pkg"
 	"github.com/spf13/viper"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -39,6 +45,67 @@ type Config struct {
 	Servers        []ConfigServer  `yaml:"servers"`
 	Users          []ConfigUser    `yaml:"users"`
 	Contexts       []ConfigContext `yaml:"contexts"`
+}
+
+type FileInput struct {
+	Type     string                    `json:"type" yaml:"type"`
+	Metadata gospeckle.RequestMetadata `json:"metadata" yaml:"metadata"`
+	Spec     interface{}               `json:"spec" yaml:"spec"`
+}
+
+type Decoder interface {
+	Decode(interface{}) error
+}
+
+type RequestObjects struct {
+	Projects []gospeckle.ProjectRequest
+	Streams  []gospeckle.StreamRequest
+	Clients  []gospeckle.APIClientRequest
+}
+
+func (r RequestObjects) MakeRequests(ctx context.Context, c *gospeckle.Client) {
+	var totalObjects []interface{}
+
+	totalObjects = append(totalObjects, r.Projects, r.Streams, r.Clients)
+	//  len(r.Projects) + len(r.Streams) + len(r.Clients)
+	ch := make(chan string)
+
+	for _, item := range r.Projects {
+		go func(item gospeckle.ProjectRequest) {
+			p, _, err := c.Project.Create(ctx, item)
+			if err != nil {
+				ch <- err.Error()
+			} else {
+				ch <- "Created project " + p.Name + " with ID: " + p.ID
+			}
+		}(item)
+	}
+
+	for _, item := range r.Streams {
+		go func(item gospeckle.StreamRequest) {
+			s, _, err := c.Stream.Create(ctx, item)
+			if err != nil {
+				ch <- err.Error()
+			} else {
+				ch <- "Created stream " + s.Name + " with ID: " + s.StreamID
+			}
+		}(item)
+	}
+
+	for _, item := range r.Clients {
+		go func(item gospeckle.APIClientRequest) {
+			p, _, err := c.APIClient.Create(ctx, item)
+			if err != nil {
+				ch <- err.Error()
+			} else {
+				ch <- "Created client " + p.DocumentName + " with ID: " + p.ID
+			}
+		}(item)
+	}
+
+	for range totalObjects {
+		fmt.Println(<-ch)
+	}
 }
 
 func printLogo() {
@@ -204,4 +271,82 @@ func getConfigContext() CurrentConfig {
 	}
 
 	return config
+}
+
+func parseResourceFile(filePath string) (RequestObjects, error) {
+	var r RequestObjects
+
+	data, err := os.Open(filePath)
+	if err != nil {
+		return r, err
+	}
+
+	fileType := filepath.Ext(filePath)
+
+	switch fileType {
+	case ".yaml":
+		d := yaml.NewDecoder(data)
+		err := streamDecode(d, &r)
+		if err != nil {
+			return r, err
+		}
+	case ".yml":
+		d := yaml.NewDecoder(data)
+		err := streamDecode(d, &r)
+		if err != nil {
+			return r, err
+		}
+
+	case ".json":
+		d := json.NewDecoder(data)
+		err := streamDecode(d, &r)
+		if err != nil {
+			return r, err
+		}
+	}
+
+	return r, nil
+}
+
+func streamDecode(d Decoder, r *RequestObjects) error {
+
+	for {
+		var i FileInput
+		if err := d.Decode(&i); err == io.EOF {
+			break
+		} else if err != nil {
+			log.Fatal(err)
+		}
+		// fmt.Println(i)
+
+		switch i.Type {
+		case "project":
+			var p gospeckle.ProjectRequest
+			err := mapstructure.Decode(i.Spec, &p)
+			p.RequestMetadata = i.Metadata
+			if err != nil {
+				return err
+			}
+			r.Projects = append(r.Projects, p)
+
+		case "stream":
+			var s gospeckle.StreamRequest
+			err := mapstructure.Decode(i.Spec, &s)
+			s.RequestMetadata = i.Metadata
+			if err != nil {
+				return err
+			}
+			r.Streams = append(r.Streams, s)
+
+		case "client":
+			var c gospeckle.APIClientRequest
+			err := mapstructure.Decode(i.Spec, &c)
+			c.RequestMetadata = i.Metadata
+			if err != nil {
+				return err
+			}
+			r.Clients = append(r.Clients, c)
+		}
+	}
+	return nil
 }
